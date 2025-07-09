@@ -1,0 +1,31 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy files to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          pkill -f main.py || true
+          EOF
+          
+          scp -r ./app ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+          scp deploy.sh ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+
+      - name: Restart app
+        run: |
+          ssh ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'bash deploy.sh'
