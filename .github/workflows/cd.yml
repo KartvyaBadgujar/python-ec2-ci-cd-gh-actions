@@ -19,13 +19,13 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
           pkill -f main.py || true
           EOF
           
-          scp -r ./app ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
-          scp deploy.sh ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+          scp -r ./app ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+          scp deploy.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
 
       - name: Restart app
         run: |
-          ssh ec2-user@${{ secrets.EC2_PUBLIC_IP }} 'bash deploy.sh'
+          ssh ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'bash deploy.sh'
